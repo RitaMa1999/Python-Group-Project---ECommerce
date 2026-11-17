@@ -1,2 +1,151 @@
 # Python-Group-Project---ECommerce
-Group project for data analysis
+
+MMGMT 722 · Group 3 · Final Project
+
+Seller late handover on the Olist Brazilian e-commerce marketplace. We study how sellers differ in handing orders to the carrier after the `shipping_limit_date`, and which groups of sellers managers should prioritize.
+
+## Research questions
+
+| # | Question | Method |
+|---|----------|--------|
+| Q1 | How much do sellers differ in late handover? | Descriptive analysis: distributions of order volume, late orders and late rate, compared with the platform average and the same-month average |
+| Q2 | Which groups of sellers exist, and how should each be prioritized? | K-means clustering on late rate and log(order volume), standardized; k chosen with elbow / silhouette |
+
+**Late handover** = the order was handed to the carrier after `shipping_limit_date`.
+
+## Key dates and deliverables
+
+Everything is due **Monday, Nov 23, 2026**, the day we present. Double-check the dates on Avenue.
+
+| Deliverable | Due | Requirements |
+|-------------|-----|--------------|
+| Slides sent to the instructor | Evening of Nov 22, 2026 | Send before we present |
+| Final presentation | Nov 23, 2026 | 10 min + 3 min Q&A; about 10 slides, max 12; all four members speak |
+| Discussant for Group 2 | Nov 23, 2026 | 1–2 specific comments or questions in class |
+| Written report | Nov 23, 2026 | Max 12 pages excluding appendices; includes an AI-use appendix |
+| Code | Nov 23, 2026 | Runs end to end from the raw data; numbers match the report |
+| Contribution statement | Nov 23, 2026 | Signed by all four members |
+
+Group 4 is our discussant and will ask questions about our analysis.
+
+## Repository structure
+
+```
+Data/
+├── Raw/                  # Original Olist CSVs (do not edit)
+└── seller_metrics.csv    # One row per seller, produced by 01_cleaning
+notebooks/
+├── 01_cleaning.ipynb
+├── 02_q1.ipynb
+├── 03_q2.ipynb
+├── 04_checks.ipynb
+└── 05_figures.ipynb
+figures/                  # All figures; file names match slide numbers
+```
+
+### Raw data (`Data/Raw/`)
+
+| File | Contents |
+|------|----------|
+| `olist_orders_dataset.csv` | Orders, status and timestamps |
+| `olist_order_items_dataset.csv` | Order items, seller and `shipping_limit_date` |
+| `olist_sellers_dataset.csv` | Sellers |
+| `olist_customers_dataset.csv` | Customers |
+| `olist_products_dataset.csv` | Products |
+| `product_category_name_translation.csv` | Category names, Portuguese to English |
+| `olist_order_payments_dataset.csv` | Payments |
+| `olist_order_reviews_dataset.csv` | Reviews |
+| `olist_geolocation_dataset.csv` | Zip-code coordinates (about 58 MB, too large for GitHub's preview) |
+
+## Shared conventions
+
+- Every notebook reads from the same `Data/seller_metrics.csv`. Don't re-clean the data in your own notebook, so the numbers in the report, slides and code stay consistent.
+- Write code comments and variable names in English, and remove unused code.
+- Name figures in `figures/` after the slide they appear on.
+
+## Decisions to make before cleaning starts
+
+- [ ] **Minimum orders per seller:** suggested 20 for the main analysis, with 10 and 30 as checks
+- [ ] **Drop 2016?** That year has very few orders and an unusually high late rate
+- [ ] **How to measure lateness:** by timestamp (even a few minutes late counts) or by date. The platform late rate is about 9.2% vs 5.9%
+
+## Roles
+
+| Role | Responsible for | Presents | Owner |
+|------|-----------------|----------|-------|
+| Data | Cleaning, seller-level table, credibility checks, final end-to-end run; discussant on the day | Data and credibility checks (~2:00) | TBD |
+| Analysis | Q1 descriptive analysis, Q2 K-means, cluster profiles and priorities | Q2 method, findings and recommendations (~3:00) | TBD |
+| Report | Writing and editing the full report, AI-use appendix, contribution statement | Problem, research questions, conclusion (~2:30) | TBD |
+| PPT | Full slide deck, plotting code, timed rehearsal | Q1 method and findings (~2:30) | TBD |
+
+Daisy presented the data at the proposal stage, so she could keep the Data role. The other three roles go to whoever is strongest at each.
+
+## Tasks by role
+
+The critical step is **`seller_metrics.csv` on Tuesday evening**. All later analysis starts from this table.
+
+### Data
+- [ ] Mon–Tue (Nov 16–17): `01_cleaning`, using the proposal's filters (delivered, single seller, complete and correctly ordered timestamps; 93,859 orders); add a `late_handover` column
+- [ ] Tue evening (Nov 17): deliver `seller_metrics.csv` (one row per seller: orders, late orders, late rate) plus a monthly platform late-rate table
+- [ ] Wed–Thu (Nov 18–19): `04_checks` (different minimum-order thresholds, different lateness definitions, 2017 clusters tested on 2018); write data-section notes for the report
+- [ ] Fri (Nov 20): run the checks with the analysis clustering function; send result tables to Report and PPT
+- [ ] Sat (Nov 21): rerun every notebook from the raw data and confirm the numbers match the report
+- [ ] Mon (Nov 23): listen to Group 2 and ask 1–2 specific questions (others help take notes)
+
+### Analysis
+- [ ] Mon–Tue (Nov 16–17): build the Q1 and Q2 code skeletons using the preliminary proposal data
+- [ ] Wed (Nov 18): `02_q1`, distributions of seller order volume, late orders and late rate, compared with the platform and same-month averages
+- [ ] Thu (Nov 19): `03_q2`, K-means on late rate and log(order volume), standardized; choose k with elbow / silhouette
+- [ ] Thu evening (Nov 19): deliver key Q1 numbers and the cluster profile table (sellers, average orders, average late rate); wrap clustering in a function for the Data role
+- [ ] Fri (Nov 20): set priorities and management actions for each cluster with the Report role
+- [ ] Sat (Nov 21): check that the report describes the analysis and findings correctly
+
+### Report
+- [ ] Mon–Tue (Nov 16–17): Introduction (problem, audience, why it matters, the two research questions)
+- [ ] Wed–Thu (Nov 18–19): Data section and the Method parts for both questions, following the proposal's analysis plan
+- [ ] Fri (Nov 20): Findings once results arrive; agree on recommendations with the Analysis role
+- [ ] Sat (Nov 21): Recommendations, Conclusion, Limitations; edit down to 12 pages
+- [ ] Sun (Nov 22): collect everyone's AI-use notes for the appendix; prepare the contribution statement
+
+### PPT
+- [ ] Mon (Nov 16): set up a 10-slide skeleton from the proposal template and share it with the group
+- [ ] Tue–Thu (Nov 17–19): problem, research question and data slides; Q1 plotting code from `seller_metrics.csv`
+- [ ] Fri (Nov 20): Q2 and credibility-check figures; fill every slide
+- [ ] Sat (Nov 21): finalize the slides; remind everyone to write their script
+- [ ] Sun (Nov 22): run a timed rehearsal; send the slides to the instructor
+
+### Everyone
+- [ ] Keep notes on what you used AI for and what you checked (needed for the AI-use appendix)
+- [ ] Read the full report before Sunday. The instructor may ask anyone about any part
+
+## Presentation plan (10 slides, 10 minutes)
+
+| # | Content | Speaker | Time |
+|---|---------|---------|------|
+| 1 | Title + problem: why seller late handover is worth managing | Report | 0:45 |
+| 2 | Audience and the two research questions | Report | 0:45 |
+| 3 | Data and the definition of late handover (one slide, no cleaning details) | Data | 0:45 |
+| 4 | Q1 method + main finding: how much sellers differ | PPT | 1:15 |
+| 5 | What the Q1 findings mean for managers | PPT | 1:15 |
+| 6 | Q2 method: features used and how k was chosen | Analysis | 1:00 |
+| 7 | Q2 findings: seller cluster profiles | Analysis | 1:15 |
+| 8 | Q2 recommendations: priority and management action for each cluster | Analysis | 0:45 |
+| 9 | Credibility checks: thresholds, definitions, 2017 → 2018 | Data | 1:15 |
+| 10 | Conclusion, limitations, challenges | Report | 1:00 |
+
+Totals: Report 2:30, Data 2:00, PPT 2:30, Analysis 3:00. Slides 4–9 cover the analysis and findings (6 slides, in line with the instructor's suggested 6–7). PPT presents Q1, so they should go through the results with Analysis on Thursday. In Q&A, each person answers first for the part they presented.
+
+## Report plan (about 11 pages, 1 page spare)
+
+| Section | Writer | Input / review | Rubric (out of 100) | Pages |
+|---------|--------|----------------|---------------------|-------|
+| 1 Introduction: problem, audience, research questions | Report | — | Problem framing 20 | 1.5 |
+| 2 Data & preparation: source, cleaning, exclusions, constructed variables | Report | Data | Data 15 | 2 |
+| 3 Q1 Seller differences | Report | Analysis | Analysis 20 + Findings 20 | 2 |
+| 4 Q2 Seller clusters & priorities | Report | Analysis | Same as above | 2.5 |
+| 5 Credibility checks & limitations | Report | Data | Evaluation 15 | 1.5 |
+| 6 Recommendations & conclusion | Report | Analysis | Findings 20 | 1.5 |
+| Appendix A: AI use | Report (compiles) | Everyone submits their own notes | Required | — |
+| Appendix B: Contribution statement | Report | Signed by all four | Required | — |
+
+Code is worth 10 points; the Data role reruns it end to end on Saturday. After sections 3–5 are written, the Analysis or Data role must review them so no numbers or methods are wrong.
