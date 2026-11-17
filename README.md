@@ -32,15 +32,20 @@ Group 4 is our discussant and will ask questions about our analysis.
 
 ```
 Data/
-├── Raw/                  # Original Olist CSVs (do not edit)
-└── seller_metrics.csv    # One row per seller, produced by 01_cleaning
+├── Raw/                      # Original Olist CSVs (do not edit)
+└── Clean/                    # Outputs of notebooks/01_cleaning.ipynb (do not edit by hand)
+    ├── orders_main.csv       # Main sample: 93,598 cleaned orders, Jan 2017 – Aug 2018
+    ├── orders_group_b.csv    # 1,156 orders handed over before payment approval; 04_checks only
+    ├── seller_metrics.csv    # One row per seller (2,917), built from orders_main.csv
+    └── monthly_benchmark.csv # Platform late rate by month (2017-01 to 2018-08)
 notebooks/
-├── 01_cleaning.ipynb
+├── 01_cleaning.ipynb         # Cleaning and merge; writes everything in Data/Clean/
+├── change.markdown           # Cleaning decisions: problem, how we found it, decision, reasons
 ├── 02_q1.ipynb
 ├── 03_q2.ipynb
 ├── 04_checks.ipynb
 └── 05_figures.ipynb
-figures/                  # All figures; file names match slide numbers
+figures/                      # All figures; file names match slide numbers
 ```
 
 ### Raw data (`Data/Raw/`)
@@ -57,17 +62,32 @@ figures/                  # All figures; file names match slide numbers
 | `olist_order_reviews_dataset.csv` | Reviews |
 | `olist_geolocation_dataset.csv` | Zip-code coordinates (about 58 MB, too large for GitHub's preview) |
 
+### Cleaned data (`Data/Clean/`)
+
+Created by `notebooks/01_cleaning.ipynb`. The reasons for each cleaning step are in `notebooks/change.markdown`.
+
+| File | One row per | Contents | Used by |
+|------|-------------|----------|---------|
+| `seller_metrics.csv` | Seller (2,917) | `order_volume`, `late_orders`, `late_rate`, `benchmark_late_rate`, `late_rate_gap_pp`; no minimum-order threshold | Q1, Q2 clustering, figures |
+| `monthly_benchmark.csv` | Month (20) | `orders`, `late_orders`, `late_rate` | Q1 same-month baseline, monthly trend figure, report |
+| `orders_main.csv` | Order (93,598) | Order IDs, seller, timestamps, deadline, `late_handover` | Rebuilding seller metrics under other settings, e.g. the 2017 → 2018 holdout |
+| `orders_group_b.csv` | Order (1,156) | Same columns; handed over after purchase but before payment approval | `04_checks` only |
+
+> **Which file to use.** All main analysis (Q1, Q2, figures, report and slide numbers) reads `Data/Clean/seller_metrics.csv` and `Data/Clean/monthly_benchmark.csv`. Use `Data/Clean/orders_main.csv` only when you need seller metrics under different settings, such as the 2017 → 2018 holdout. `Data/Clean/orders_group_b.csv` is only for the credibility check in `04_checks`, where it is combined with `orders_main.csv`. Do not add it to the main analysis.
+
+**Key definitions.** The main sample is delivered, single-seller orders with complete, correctly ordered timestamps, placed from January 2017 to August 2018. An order is a late handover when it is handed to the carrier on a calendar day after its `shipping_limit_date` day. The platform late rate is 5.78%.
+
 ## Shared conventions
 
-- Every notebook reads from the same `Data/seller_metrics.csv`. Don't re-clean the data in your own notebook, so the numbers in the report, slides and code stay consistent.
+- Every notebook reads from the same `Data/Clean/seller_metrics.csv`. Don't re-clean the data in your own notebook, so the numbers in the report, slides and code stay consistent.
 - Write code comments and variable names in English, and remove unused code.
 - Name figures in `figures/` after the slide they appear on.
 
-## Decisions to make before cleaning starts
+## Decisions before cleaning
 
-- [ ] **Minimum orders per seller:** suggested 20 for the main analysis, with 10 and 30 as checks
-- [ ] **Drop 2016?** That year has very few orders and an unusually high late rate
-- [ ] **How to measure lateness:** by timestamp (even a few minutes late counts) or by date. The platform late rate is about 9.2% vs 5.9%
+- [ ] **Minimum orders per seller:** left to the clustering team; suggested 20 for the main analysis, with 10 and 30 as checks. See the handoff section of `notebooks/01_cleaning.ipynb`
+- [x] **Drop 2016?** Yes. The study period is January 2017 to August 2018
+- [x] **How to measure lateness:** by date. The platform late rate is 5.78% by date and 9.10% by timestamp (tested in `04_checks`)
 
 ## Roles
 
