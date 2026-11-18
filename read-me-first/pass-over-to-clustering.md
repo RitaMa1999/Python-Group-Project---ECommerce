@@ -80,17 +80,19 @@ Review ratings are in `Data/Clean/` (change 8 in `notebooks/change.markdown`). U
 
 ### What we found so far
 
-Using the current K-means result (late rate and log order volume, k = 3, sellers with ≥20 orders), the two ratings give practically the same results:
+From the Q2 tier analysis (Rui, 18 November 2026: K-means on late rate and log(1 + late orders), k = 4, sellers with ≥20 orders, `review_score_last`). These replace the earlier k = 3 results.
 
-| Cluster | Avg. rating (last / first) | Share of reviews ≤ 2 stars (last / first) |
-| --- | --- | --- |
-| 1: small, mostly punctual (477 sellers) | 4.265 / 4.266 | 10.4% / 10.4% |
-| 2: large (222 sellers) | 4.163 / 4.164 | 12.3% / 12.3% |
-| 3: high late rate (79 sellers) | 3.811 / 3.813 | 21.3% / 21.2% |
+| Tier | Sellers | Late rate | Share of late orders of sellers with ≥20 orders | Avg. rating | Share of reviews ≤ 2 stars |
+| --- | --- | --- | --- | --- | --- |
+| 1: almost never late | 383 | 0.6% | 3% | 4.30 | 9.6% |
+| 2: occasionally late | 236 | 3.2% | 20% | 4.19 | 11.8% |
+| 3: often late, large volume | 132 | 8.6% | 58% | 4.09 | 14.1% |
+| 4: severely late | 27 | 36.1% | 18% | 3.63 | 26.0% |
 
-- The difference between clusters is significant under both ratings (Kruskal-Wallis on seller averages: H = 95.4 and 95.7, p < 0.001).
-- In every cluster, late orders score about 0.5–0.7 stars lower than on-time orders (orders of the 778 clustered sellers: 3.57 vs 4.20 under both ratings; across the whole main sample, 3.55 vs 4.21).
-- The 18 sellers in cluster 2 with more than twice the platform late rate average 3.91 stars (17.9% low reviews), closer to cluster 3 than to the rest of cluster 2 (4.18).
+- **Denominator:** the late-order shares are of the 4,493 late orders of sellers with ≥20 orders. Of all 5,407 late orders, the focus tiers (3 and 4) account for about 64%, not 77%.
+- Ratings differ significantly between tiers (Kruskal-Wallis, H = 131.8, p < 0.001). Part of this follows from how tiers are built: tiers are defined by lateness, and late orders score lower.
+- After removing that effect and product category, only Tier 4 still scores lower on on-time orders (−0.34 stars against the category average).
+- The earliest and latest ratings give the same results.
 
 ### What to do
 
@@ -110,7 +112,6 @@ Using the current K-means result (late rate and log order volume, k = 3, sellers
 **Findings that lead into Q2.**
 - Late handovers are concentrated: the top 50 sellers (1.7%) cause 40.6% of late orders.
 - Sellers with many late orders are of two kinds: large sellers close to the platform rate, and mid-sized sellers with very high late rates. They need different actions.
-- Order volume and late rate are unrelated (correlation about 0 for sellers with at least 20 orders), which is why clustering on both is informative.
 - Comparing each seller with the platform in the same months changes the classification of only 18 of 778 sellers.
 
 **Correction.** The January 2017 platform late rate is 18.5% (138 of 744 orders). An earlier draft said 18.6%; use 18.5%.
