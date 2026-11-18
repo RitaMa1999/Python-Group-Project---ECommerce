@@ -30,6 +30,8 @@ Group 4 is our discussant and will ask questions about our analysis.
 
 ## Repository structure
 
+> **Read `notation/` before starting your part.** The clustering team starts with `notation/pass-over-to-clustering.md`.
+
 ```
 Data/
 ├── Raw/                      # Original Olist CSVs (do not edit)
@@ -47,6 +49,8 @@ notebooks/
 ├── 04_checks.ipynb
 └── 05_figures.ipynb
 figures/                      # All figures, named by notebook and item (e.g. q1_02a_pareto_curve.png)
+notation/                     # Read before starting your part
+└── pass-over-to-clustering.md  # Handoff for Q2 and 04_checks: files, definitions, threshold, checks
 ```
 
 ### Raw data (`Data/Raw/`)
