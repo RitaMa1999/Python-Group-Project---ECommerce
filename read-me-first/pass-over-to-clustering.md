@@ -15,9 +15,9 @@ Created by `notebooks/01_cleaning.ipynb`, which loads the raw CSVs from this rep
 
 | File | What to use it for |
 | --- | --- |
-| `seller_metrics.csv` | One row per seller (2,917): `order_volume`, `late_orders`, `late_rate`, `benchmark_late_rate`, `late_rate_gap_pp`. Input for Q1, the Q2 clustering and figures. No minimum-order threshold applied. |
+| `seller_metrics.csv` | One row per seller (2,917): `order_volume`, `late_orders`, `late_rate`, `benchmark_late_rate`, `late_rate_gap_pp`, plus review summaries (see **Review ratings**). Input for Q1, the Q2 clustering and figures. No minimum-order threshold applied. |
 | `monthly_benchmark.csv` | Platform late rate by purchase month, 2017-01 to 2018-08. Same-month baseline for Q1 and the monthly trend figure. |
-| `orders_main.csv` | Main sample, one row per order (93,598). Use it to rebuild seller metrics under other settings, such as the 2017 training and 2018 validation split. |
+| `orders_main.csv` | Main sample, one row per order (93,598), including `review_score_first` and `review_score_last`. Use it to rebuild seller metrics under other settings, such as the 2017 training and 2018 validation split. |
 | `orders_group_b.csv` | 1,156 orders handed over after purchase but before payment approval. Use only in `04_checks`: combine with `orders_main.csv` and compare results. |
 
 All main analysis (Q1, Q2, figures, report and slide numbers) reads `seller_metrics.csv` and `monthly_benchmark.csv`. Do not add `orders_group_b.csv` to the main analysis.
@@ -66,69 +66,17 @@ Few sellers are active enough in both years. Rebuild yearly seller metrics from 
 
 ## Review ratings (optional, for cluster profiles)
 
-Review scores are **not** in `Data/Clean/`. If you want to describe the clusters with customer ratings, build them from the raw reviews table as below. The clustering team decides which rating to use and reports the comparison.
+Review ratings are in `Data/Clean/` (change 8 in `notebooks/change.markdown`). Use them to describe the clusters; the clustering team decides which rating to use and reports the comparison.
 
-### Why there are two ratings
+| File | Columns |
+| --- | --- |
+| `orders_main.csv`, `orders_group_b.csv` | `review_score_first` (earliest review), `review_score_last` (latest review) |
+| `seller_metrics.csv` | `reviewed_orders` (orders with a review), `avg_review_first`, `avg_review_last`, `low_review_share_first`, `low_review_share_last` (share of ratings of 2 stars or less) |
 
-The reviews table does not have exactly one review per order:
-
-- **One order, several reviews:** 547 orders have 2 or 3 reviews (1,098 rows). The reviews are usually a few days apart (median 3 days, up to 106), and 202 of these orders have different scores. The customer most likely answered the review survey more than once.
-- **One review, several orders:** 789 reviews are attached to more than one order (1,603 rows). In every case it is the same customer, and 95% of the orders were placed on the same day: most likely one purchase split into several orders, with one survey answer applied to all of them. Keep the score for each order.
-
-The dataset documentation does not explain either case; these reasons are inferred from the data, so describe them as "likely" in the report.
-
-For orders with several reviews, build two ratings and compare them:
-
-- `review_score_first`: the earliest review (closest to the delivery experience).
-- `review_score_last`: the latest review (the customer's final view).
-
-Orders without a review (622 of 93,598, 0.7%) are left missing, not filled in.
-
-### Code
-
-Run from the `notebooks/` folder.
-
-```python
-import pandas as pd
-
-data_url = (
-    "https://raw.githubusercontent.com/"
-    "RitaMa1999/Python-Group-Project---ECommerce/main/Data/Raw"
-)
-reviews = pd.read_csv(
-    f"{data_url}/olist_order_reviews_dataset.csv",
-    parse_dates=["review_creation_date", "review_answer_timestamp"],
-).sort_values(["review_creation_date", "review_answer_timestamp"])
-
-order_reviews = (
-    reviews.drop_duplicates("order_id", keep="first")[["order_id", "review_score"]]
-    .rename(columns={"review_score": "review_score_first"})
-    .merge(
-        reviews.drop_duplicates("order_id", keep="last")[["order_id", "review_score"]]
-        .rename(columns={"review_score": "review_score_last"}),
-        on="order_id",
-        validate="one_to_one",
-    )
-)
-
-orders_main = pd.read_csv("../Data/Clean/orders_main.csv")
-orders_reviewed = orders_main.merge(order_reviews, on="order_id", how="left", validate="one_to_one")
-
-seller_reviews = orders_reviewed.groupby("seller_id").agg(
-    avg_review_first=("review_score_first", "mean"),
-    avg_review_last=("review_score_last", "mean"),
-    low_review_share_first=("review_score_first", lambda score: score.dropna().le(2).mean()),
-    low_review_share_last=("review_score_last", lambda score: score.dropna().le(2).mean()),
-    reviewed_orders=("review_score_last", "count"),
-).reset_index()
-
-print(f"Orders without a review: {orders_reviewed['review_score_last'].isna().sum():,}")
-has_review = orders_reviewed["review_score_last"].notna()
-score_changed = has_review & orders_reviewed["review_score_first"].ne(orders_reviewed["review_score_last"])
-print(f"Orders whose first and last score differ: {score_changed.sum():,}")
-```
-
-Expected output: 622 orders without a review; 179 orders (0.2%) whose first and last scores differ.
+- **Why two ratings:** 547 orders have more than one review (most likely the customer answered the survey more than once; 202 have different scores). The earliest review is closest to the delivery experience; the latest is the customer's final view. For orders with one review, both columns are the same.
+- **Shared reviews:** 789 reviews are attached to several orders bought together by the same customer; each of those orders keeps that score.
+- **Missing ratings:** 622 of 93,598 main-sample orders (0.7%) have no review and keep missing ratings. 3 sellers have no reviewed orders, so their review columns in `seller_metrics.csv` are missing.
+- Only 179 main-sample orders (0.2%) have different first and last scores.
 
 ### What we found so far
 
