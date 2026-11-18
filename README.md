@@ -41,11 +41,12 @@ Data/
 notebooks/
 ├── 01_cleaning.ipynb         # Cleaning and merge; writes everything in Data/Clean/
 ├── change.markdown           # Cleaning decisions: problem, how we found it, decision, reasons
-├── 02_q1.ipynb
+├── 02_descriptive_analysis.ipynb  # Q1 descriptive analysis; writes figures/q1_*.png
+├── descriptive_analysis.markdown  # Q1 plan: each chart, why, and the decisions behind it
 ├── 03_q2.ipynb
 ├── 04_checks.ipynb
 └── 05_figures.ipynb
-figures/                      # All figures; file names match slide numbers
+figures/                      # All figures, named by notebook and item (e.g. q1_02a_pareto_curve.png)
 ```
 
 ### Raw data (`Data/Raw/`)
@@ -81,7 +82,7 @@ Created by `notebooks/01_cleaning.ipynb`. The reasons for each cleaning step are
 
 - Every notebook reads from the same `Data/Clean/seller_metrics.csv`. Don't re-clean the data in your own notebook, so the numbers in the report, slides and code stay consistent.
 - Write code comments and variable names in English, and remove unused code.
-- Name figures in `figures/` after the slide they appear on.
+- Name figures in `figures/` by notebook and item number (for example `q1_02a_pareto_curve.png`), because slide numbers are not final. The PPT role can save slide-numbered copies once the slides are fixed.
 
 ## Decisions before cleaning
 
@@ -114,7 +115,7 @@ The critical step is **`seller_metrics.csv` on Tuesday evening**. All later anal
 
 ### Analysis
 - [ ] Mon–Tue (Nov 16–17): build the Q1 and Q2 code skeletons using the preliminary proposal data
-- [ ] Wed (Nov 18): `02_q1`, distributions of seller order volume, late orders and late rate, compared with the platform and same-month averages
+- [ ] Wed (Nov 18): `02_descriptive_analysis`, distributions of seller order volume, late orders and late rate, compared with the platform and same-month averages
 - [ ] Thu (Nov 19): `03_q2`, K-means on late rate and log(order volume), standardized; choose k with elbow / silhouette
 - [ ] Thu evening (Nov 19): deliver key Q1 numbers and the cluster profile table (sellers, average orders, average late rate); wrap clustering in a function for the Data role
 - [ ] Fri (Nov 20): set priorities and management actions for each cluster with the Report role

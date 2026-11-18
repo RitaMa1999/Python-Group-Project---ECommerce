@@ -544,7 +544,7 @@ New columns:
 **Why.**
 - **One source for every number.** Q1, Q2, the figures, the report and the slides all read the same files, so their numbers agree.
 - **It matches the group plan.** The plan names `seller_metrics.csv` and a monthly platform late-rate table as the data role's Tuesday deliverables.
-- **A fair comparison for each seller.** Platform late rates range from 3.5% to 18.6% by month. A seller who sells mostly in high-rate months such as November or January would look worse on raw late rate alone. `late_rate_gap_pp` compares each seller with the platform in the months it actually sold, which is the same-month baseline in the analysis plan.
+- **A fair comparison for each seller.** Platform late rates range from 3.5% to 18.5% by month. A seller who sells mostly in high-rate months such as November or January would look worse on raw late rate alone. `late_rate_gap_pp` compares each seller with the platform in the months it actually sold, which is the same-month baseline in the analysis plan.
 
 **Choices built into the files.**
 - **No minimum-order threshold.** All 2,917 sellers are kept; the clustering team chooses the threshold (see **Left to the clustering team**).
@@ -634,7 +634,7 @@ Expected output:
 **Limitation to mention.** The monthly benchmark includes the seller being compared. A large seller pulls the platform rate for its months toward its own rate, which slightly shrinks its gap. The largest seller has at most 5.9% of any month's orders, so the effect is small.
 
 **Report wording (Data section).**
-> For each seller we computed order volume, the number of late handovers and the late rate. To compare sellers fairly across months with different platform late rates (3.5% to 18.6%), we also computed a same-month benchmark: the late rate the seller would have if each of its orders were late at the platform rate for its month. The gap between a seller's late rate and this benchmark, in percentage points, shows whether the seller is later or more punctual than the platform in the months it sold.
+> For each seller we computed order volume, the number of late handovers and the late rate. To compare sellers fairly across months with different platform late rates (3.5% to 18.5%), we also computed a same-month benchmark: the late rate the seller would have if each of its orders were late at the platform rate for its month. The gap between a seller's late rate and this benchmark, in percentage points, shows whether the seller is later or more punctual than the platform in the months it sold.
 
 ## Resolved issues
 
