@@ -89,7 +89,7 @@ Using the current K-means result (late rate and log order volume, k = 3, sellers
 | 3: high late rate (79 sellers) | 3.811 / 3.813 | 21.3% / 21.2% |
 
 - The difference between clusters is significant under both ratings (Kruskal-Wallis on seller averages: H = 95.4 and 95.7, p < 0.001).
-- In every cluster, late orders score about 0.5–0.7 stars lower than on-time orders (all orders: 3.57 vs 4.20 under both ratings).
+- In every cluster, late orders score about 0.5–0.7 stars lower than on-time orders (orders of the 778 clustered sellers: 3.57 vs 4.20 under both ratings; across the whole main sample, 3.55 vs 4.21).
 - The 18 sellers in cluster 2 with more than twice the platform late rate average 3.91 stars (17.9% low reviews), closer to cluster 3 than to the rest of cluster 2 (4.18).
 
 ### What to do
