@@ -30,7 +30,7 @@ Group 4 is our discussant and will ask questions about our analysis.
 
 ## Repository structure
 
-> **Read `notation/` before starting your part.** The clustering team starts with `notation/pass-over-to-clustering.md`.
+> **Read `read-me-first/` before starting your part.** The clustering team starts with `read-me-first/pass-over-to-clustering.md`, the PPT role with `read-me-first/pass-over-to-ppt.md`, and the report writer with `read-me-first/ai-use-appendix.md` for Appendix A.
 
 ```
 Data/
@@ -49,8 +49,10 @@ notebooks/
 ├── 04_checks.ipynb
 └── 05_figures.ipynb
 figures/                      # All figures, named by notebook and item (e.g. q1_02a_pareto_curve.png)
-notation/                     # Read before starting your part
-└── pass-over-to-clustering.md  # Handoff for Q2 and 04_checks: files, definitions, threshold, checks
+read-me-first/                # Read before starting your part
+├── pass-over-to-clustering.md  # Handoff for Q2 and 04_checks: files, definitions, threshold, checks
+├── pass-over-to-ppt.md         # Handoff for the slides: figures, which to use, styling, key numbers
+└── ai-use-appendix.md          # AI-use records from the notebooks, for the report's Appendix A
 ```
 
 ### Raw data (`Data/Raw/`)

@@ -653,49 +653,16 @@ Problems from the notebook review and the change that resolves each one.
 - [x] Orders with more than one seller (1,278): change 5.
 - [x] Late handover definition: by date (5.78%), with the timestamp version (9.10%) in `04_checks`: change 6.
 - [x] Seller metrics and monthly benchmark only in memory: change 7, with same-month benchmark columns added.
+- [x] `order_volume` vs eligible orders: resolved by changes 1–4. Every order in the main sample has a known handover outcome, so `order_volume` equals the number of eligible orders.
 - [x] Code clean-up, done in the rebuild of `01_cleaning.ipynb`: removed the purchase-month mismatch check, duplicate imports, reused variable names and the `eligible_*` / `unknown_orders` columns; `late_rate` is saved as a plain float; only `orders` and `order_items` are loaded.
 
 ## Left to the clustering team
 
-These are not cleaning decisions. The cleaning notebook does not apply them; it passes the information below to whoever builds the clusters.
-
-### Minimum orders per seller
-
-Many sellers have very few orders, so their late rates are unreliable. In the main sample (93,598 orders, 2,917 sellers), 79% of sellers with fewer than 5 orders have a 0% late rate and 10% have 100%.
-
-| Minimum orders | Sellers kept | Share of sellers | Share of orders |
-|---|---|---|---|
-| None | 2,917 | 100% | 100% |
-| 5 | 1,715 | 58.8% | 97.4% |
-| 10 | 1,199 | 41.1% | 93.7% |
-| 20 | 778 | 26.7% | 87.5% |
-| 30 | 604 | 20.7% | 83.0% |
-
-Points for the clustering team:
-- The group plan suggests 20 orders for the main analysis, with 10 and 30 as checks in `04_checks`. The final choice is the clustering team's.
-- Apply the threshold to sellers in the clustering step only. Do not drop orders: the platform late rate, the monthly benchmark and the Q1 distributions use all 93,598 orders.
-- Small sellers can still appear in Q1 as context, for example in the distribution of seller order volume.
-- Explain the chosen threshold in the report and show how the results change under the alternatives.
-
-### 2017 → 2018 holdout
-
-The holdout fits clusters on 2017 seller metrics and tests them on 2018. Few sellers are active enough in both years:
-
-| Minimum orders in each year | Sellers in 2017 | Sellers in 2018 | Sellers in both years |
-|---|---|---|---|
-| 10 | 640 | 876 | 429 |
-| 20 | 420 | 527 | 264 |
-| 30 | 309 | 368 | 171 |
-
-Rebuild the yearly seller metrics from `Data/Clean/orders_main.csv`, and check this count early so the holdout design fits the sample.
-
-Add these tables and points to the notebook's handoff section (see **Documentation to update**).
+These are not cleaning decisions; the cleaning notebook passes them to the clustering team. The minimum-order threshold, the 2017 → 2018 holdout counts and the `04_checks` credibility checks are in **[`read-me-first/pass-over-to-clustering.md`](../read-me-first/pass-over-to-clustering.md)**.
 
 ## Issues still to decide
 
-These come from the notebook review and have not been agreed yet.
-
-- [ ] Use eligible orders, not all orders, as `order_volume`.
+None. Every issue from the notebook review has been resolved (see **Resolved issues**).
 
 Expected result after changes 1–4: 93,598 orders in the main sample, January 2017 to August 2018 (the proposal's 93,859, minus 1 order in change 3 and 260 orders from 2016 in change 4), 1,156 orders in `Data/Clean/orders_group_b.csv`; together 94,754 orders for the `04_checks` check sample. With the date definition from change 6, the platform late rate in the main sample is 5.78%.
 

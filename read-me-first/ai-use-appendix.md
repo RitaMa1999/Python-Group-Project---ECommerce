@@ -1,0 +1,100 @@
+# AI-Use Appendix
+
+**Read this before writing Appendix A of the report.** It collects the AI-use records from the project notebooks in one place, so the report writer can merge them with everyone else's records.
+
+| Part | Notebook | Tools |
+| --- | --- | --- |
+| 1 | `notebooks/01_cleaning.ipynb` (data cleaning and merge) | ChatGPT, Claude |
+| 2 | `notebooks/02_descriptive_analysis.ipynb` (Q1 descriptive analysis) | Claude |
+
+Contributor: [name]. The same text also appears at the end of each notebook; if you change one, change both.
+
+## Part 1. Data cleaning and merge (`01_cleaning.ipynb`)
+
+I used ChatGPT to draft and revise pandas code for the first version of this notebook (A.1–A.4), and Claude (Anthropic) to review that version against the raw data and rebuild it (A.5). The prompts below document how the notebook developed in stages.
+
+### A.1 Order data validation and cleaning
+
+> Please write a python code to check the values in `order_id` column in the `orders` dataset are unique and complete, so the existing records can be retained.
+
+> write a python code to standardize the time format. Convert the order placement time (`order_purchase_timestamp`) and the actual delivery time (`order_delivered_carrier_date`) to a date-time format. Both them in the order dataset. The order placement time will later be used for month-to-month comparisons.
+
+> please write a code to check the Missing and Abnormal Values for three columns: **order_purchase_timestamp**, **order_delivered_carrier_date**, **order_purchase_month**
+
+> Write the code to clean the `order_status` column in my existing `orders` DataFrame using pandas. The previous already check order IDs, parse purchase and carrier handover timestamps, and flag timestamp issues. Continue from the current `orders` DataFrame.
+
+> Then Convert `order_status` to pandas’ nullable string type, strip leading and trailing whitespace, convert values to lowercase, and treat empty strings as missing. Display a summary table with the order count and percentage for each status, including missing values. Use all rows in `orders` as the denominator, and keep every order for later analysis.
+
+In the final analysis, I used `order_delivered_carrier_date` as the **carrier handover timestamp**.
+
+### A.2 Order–seller table and merge
+
+> Firstly, copy `order_id`, `seller_id`, and `shipping_limit_date` from `order_items`. Preserve the original DataFrame. Then treat both ID columns as strings, trim whitespace, and check for missing or blank IDs. Report any affected rows before grouping. Finally, convert `shipping_limit_date` to a datetime column and report how many values were originally missing and how many failed to parse.
+
+> Please write code to check whether any `order_id` and `seller_id` pair has conflicting shipping deadlines. If any conflicts exist, display the affected pairs and stop so I can review them. Otherwise, collapse repeated item rows to one row per `order_id`and `seller_id`, preserving the available deadline.
+
+> Add `seller_count` for the number of distinct sellers per order and `is_multi_seller_order` to flag orders with more than one seller. Keep those orders available for later analysis.
+
+> Save the result as `seller_orders`, verify that `order_id` and `seller_id` are unique as a pair, and print the original item row count, final seller-order row count, and number of distinct multi-seller orders.
+
+> Write the code using pandas. I already have `orders`, with parsed purchase and carrier handover timestamps, and `seller_orders`, with one row per `order_id` and `seller_id`, a parsed `shipping_limit_date`, and an `is_multi_seller_order` flag. Please left join `seller_orders` to `orders` on `order_id`. Validate the merge as many-to-one. Report the row count before and after the merge and the number of unmatched rows. Verify that each `order_id` and `seller_id` pair remains unique.
+
+> could u rename the merge dataset as `merged_orders`
+
+### A.3 Late handover eligibility and seller summary
+
+> write a code to add flags for missing handover timestamps and for handover timestamps earlier than the purchase timestamp. Preserve the original timestamps. Then Create `analysis_orders` from single-seller orders and add an `eligible_for_late_rate` flag that requires a valid purchase timestamp, carrier handover timestamp, and shipping deadline, with handover at or after purchase. Create `late_handover` as a nullable Boolean. Finally, set it to `True` when an eligible order was handed over after its shipping deadline, `False` when it was handed over on or before the deadline, and `pd.NA` when eligibility requirements are not met.
+
+> It has bug. I write a code to add before your code. timestamp_columns = [
+>     "order_purchase_timestamp",
+>     "order_delivered_carrier_date",
+>     "shipping_limit_date",
+> ]
+>
+> for column in timestamp_columns:
+>     merged_orders[column] = pd.to_datetime(
+>         merged_orders[column], errors="raise"
+>     )
+
+> Write the next Jupyter Notebook cell using pandas. I already have `analysis_orders`, with one row per single-seller order and the columns `seller_id`, `order_id`, `eligible_for_late_rate`, and `late_handover`. The nullable Boolean column `late_handover` is `True` for late, `False` for on time, and `pd.NA` for unknown.
+
+> Group by `seller_id` and save the result as `seller_summary`, with one row per seller. Calculate `order_volume` from all rows, `eligible_orders` from rows eligible for the late rate, `late_orders` from rows marked `True`, and `late_rate` as `late_orders / eligible_orders`. Leave `late_rate` missing when `eligible_orders` is zero.
+
+> Verify that the totals across sellers and Display the top 10 sellers by late order count
+
+### A.4 Monthly benchmarks and seller comparisons
+
+> I already have `analysis_orders`, with one row per single-seller order and the columns `seller_id`, `order_purchase_month`, `eligible_for_late_rate`, and `late_handover`. please calculate the overall and monthly late handover rates across the single-seller analysis sample. For each month, divide the total number of late orders by the total number of eligible orders in that month. Then calculate the same counts and rates by seller and month, and merge the monthly benchmark onto the seller-month table. Save the result as `seller_monthly_summary`.
+
+In my next message, I shared the revised notebook cell and asked ChatGPT to use it going forward. The excerpt below shows the change I made before grouping by month.
+
+> It has bug. so I rewrite the code. Now it becomes
+>
+> ```python
+> analysis_orders["order_purchase_month"] = pd.to_datetime(
+>     analysis_orders["order_purchase_timestamp"],
+>     errors="raise",
+> ).dt.to_period("M")
+> ```
+>
+> […] please remember it
+
+> Then add a column for the seller's late rate minus the monthly benchmark, expressed in percentage points. Leave rates missing when the eligible order count is zero. Keep the eligible order count visible so I can interpret results based on small samples. Display the monthly benchmark table and a preview of `seller_monthly_summary`.
+
+### A.5 Data review and rebuild with Claude
+
+- **Review:** I had Claude review our project proposal slides and all of our CSV files, and based on those, check the data cleaning and merging code I had written earlier. Claude pointed out several issues: missing handover timestamps; undelivered orders being included in the late handover rate; out-of-order timestamps; shipping deadlines in 2020; too little data for 2016 and for September–October 2018; and a total sample size that did not match the 93,859 orders in the proposal.
+- **Decision-making:** For each issue, Claude provided recommendations, but I made the final decision. I decided to exclude undelivered orders and orders with out-of-order timestamps (without filling in missing values); keep the group B orders for a credibility check; exclude orders with deadlines in 2020; exclude 2016 data; define late handover by date; and leave the minimum-order threshold to the clustering team. Every decision, its rationale and the code used to identify each issue are documented in `notebooks/change.markdown`.
+- **Rebuild:** I used Claude to rewrite the cleaning notebook based on `change.markdown`. I also used Claude to change how the data is loaded, so the raw data now loads from our GitHub repository and the cleaned files are saved to the `Data/Clean/` directory.
+
+## Part 2. Q1 descriptive analysis (`02_descriptive_analysis.ipynb`)
+
+I used Claude (Anthropic) to plan and build this notebook.
+
+- **Planning:** Based on the two files, `seller_metrics.csv` and `monthly_benchmark.csv`, Claude offered me some suggestions. I then worked with Claude to confirm, one by one, that these charts met our requirements and aligned with our ideas. Finally, I documented these proposals in the `notebooks/descriptive_analysis.markdown` file.
+- **Decision-making:** Claude provided recommendations, but I made the final decisions, and in several places I changed its suggestions:
+  - Claude suggested applying a minimum-order threshold to all seller-level charts. I proposed instead to show sellers without a threshold and use a chart to explain why a threshold may be needed, and asked that the notebook explain why some charts use the threshold and others do not.
+  - For the headline numbers, Claude suggested choosing between the share of sellers never late across all sellers (64%) and the share among sellers with at least 20 orders (32%). I decided to show both side by side, so the contrast itself explains the threshold.
+  - Where two charts suited the same point, such as the Pareto chart, I decided to produce both and let the PPT role choose.
+  - Claude first planned to save the tables behind the charts as separate CSV files. I asked instead for each table to be shown inside the notebook before its chart, so readers can see exactly which data each chart is drawn from.
+- **Build:** I used Claude to write this notebook based on `descriptive_analysis.markdown`, and to save the charts to the `figures/` directory.
