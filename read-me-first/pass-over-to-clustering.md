@@ -64,6 +64,93 @@ Few sellers are active enough in both years. Rebuild yearly seller metrics from 
 
 **Minimum-order threshold.** Rerun the clustering with the alternative thresholds (suggested 10 and 30) and compare the results.
 
+## Review ratings (optional, for cluster profiles)
+
+Review scores are **not** in `Data/Clean/`. If you want to describe the clusters with customer ratings, build them from the raw reviews table as below. The clustering team decides which rating to use and reports the comparison.
+
+### Why there are two ratings
+
+The reviews table does not have exactly one review per order:
+
+- **One order, several reviews:** 547 orders have 2 or 3 reviews (1,098 rows). The reviews are usually a few days apart (median 3 days, up to 106), and 202 of these orders have different scores. The customer most likely answered the review survey more than once.
+- **One review, several orders:** 789 reviews are attached to more than one order (1,603 rows). In every case it is the same customer, and 95% of the orders were placed on the same day: most likely one purchase split into several orders, with one survey answer applied to all of them. Keep the score for each order.
+
+The dataset documentation does not explain either case; these reasons are inferred from the data, so describe them as "likely" in the report.
+
+For orders with several reviews, build two ratings and compare them:
+
+- `review_score_first`: the earliest review (closest to the delivery experience).
+- `review_score_last`: the latest review (the customer's final view).
+
+Orders without a review (622 of 93,598, 0.7%) are left missing, not filled in.
+
+### Code
+
+Run from the `notebooks/` folder.
+
+```python
+import pandas as pd
+
+data_url = (
+    "https://raw.githubusercontent.com/"
+    "RitaMa1999/Python-Group-Project---ECommerce/main/Data/Raw"
+)
+reviews = pd.read_csv(
+    f"{data_url}/olist_order_reviews_dataset.csv",
+    parse_dates=["review_creation_date", "review_answer_timestamp"],
+).sort_values(["review_creation_date", "review_answer_timestamp"])
+
+order_reviews = (
+    reviews.drop_duplicates("order_id", keep="first")[["order_id", "review_score"]]
+    .rename(columns={"review_score": "review_score_first"})
+    .merge(
+        reviews.drop_duplicates("order_id", keep="last")[["order_id", "review_score"]]
+        .rename(columns={"review_score": "review_score_last"}),
+        on="order_id",
+        validate="one_to_one",
+    )
+)
+
+orders_main = pd.read_csv("../Data/Clean/orders_main.csv")
+orders_reviewed = orders_main.merge(order_reviews, on="order_id", how="left", validate="one_to_one")
+
+seller_reviews = orders_reviewed.groupby("seller_id").agg(
+    avg_review_first=("review_score_first", "mean"),
+    avg_review_last=("review_score_last", "mean"),
+    low_review_share_first=("review_score_first", lambda score: score.dropna().le(2).mean()),
+    low_review_share_last=("review_score_last", lambda score: score.dropna().le(2).mean()),
+    reviewed_orders=("review_score_last", "count"),
+).reset_index()
+
+print(f"Orders without a review: {orders_reviewed['review_score_last'].isna().sum():,}")
+has_review = orders_reviewed["review_score_last"].notna()
+score_changed = has_review & orders_reviewed["review_score_first"].ne(orders_reviewed["review_score_last"])
+print(f"Orders whose first and last score differ: {score_changed.sum():,}")
+```
+
+Expected output: 622 orders without a review; 179 orders (0.2%) whose first and last scores differ.
+
+### What we found so far
+
+Using the current K-means result (late rate and log order volume, k = 3, sellers with ≥20 orders), the two ratings give practically the same results:
+
+| Cluster | Avg. rating (last / first) | Share of reviews ≤ 2 stars (last / first) |
+| --- | --- | --- |
+| 1: small, mostly punctual (477 sellers) | 4.265 / 4.266 | 10.4% / 10.4% |
+| 2: large (222 sellers) | 4.163 / 4.164 | 12.3% / 12.3% |
+| 3: high late rate (79 sellers) | 3.811 / 3.813 | 21.3% / 21.2% |
+
+- The difference between clusters is significant under both ratings (Kruskal-Wallis on seller averages: H = 95.4 and 95.7, p < 0.001).
+- In every cluster, late orders score about 0.5–0.7 stars lower than on-time orders (all orders: 3.57 vs 4.20 under both ratings).
+- The 18 sellers in cluster 2 with more than twice the platform late rate average 3.91 stars (17.9% low reviews), closer to cluster 3 than to the rest of cluster 2 (4.18).
+
+### What to do
+
+1. Choose which rating to use for the cluster profiles, and use it consistently in the notebook, report and slides.
+2. Show the comparison with the other rating as a robustness check, for example: "Using the earliest instead of the latest review changes the score of 179 orders (0.2%) and does not change the results."
+3. Use ratings to **describe** clusters, not as a clustering feature. Adding the average rating lowered the silhouette score in our tests, and it would change the question from late handover to overall seller quality.
+4. Write the link as an association, not a cause: ratings also depend on carrier delivery and product quality ("late handovers are associated with lower review scores").
+
 ## Notes on the Q1 descriptive analysis
 
 **If you change the threshold.** `02_descriptive_analysis.ipynb` uses 20 orders for the charts that compare sellers' late rates. If the clustering team chooses a different threshold, change `MIN_ORDERS` in its setup cell and rerun. The tables and charts update automatically, but the numbers quoted in the explanation text are for 20 orders and must be edited by hand.
