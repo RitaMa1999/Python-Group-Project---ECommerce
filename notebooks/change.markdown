@@ -654,7 +654,86 @@ Problems from the notebook review and the change that resolves each one.
 - [x] Late handover definition: by date (5.78%), with the timestamp version (9.10%) in `04_checks`: change 6.
 - [x] Seller metrics and monthly benchmark only in memory: change 7, with same-month benchmark columns added.
 - [x] `order_volume` vs eligible orders: resolved by changes 1–4. Every order in the main sample has a known handover outcome, so `order_volume` equals the number of eligible orders.
+- [x] Orders with several reviews, and reviews shared by several orders: change 8, with the earliest and latest rating both kept.
 - [x] Code clean-up, done in the rebuild of `01_cleaning.ipynb`: removed the purchase-month mismatch check, duplicate imports, reused variable names and the `eligible_*` / `unknown_orders` columns; `late_rate` is saved as a plain float; only `orders` and `order_items` are loaded.
+
+### 8. Review ratings: orders with several reviews
+
+**Problem.** The reviews table (`olist_order_reviews_dataset.csv`, 99,224 rows) does not have exactly one review per order, so it cannot be merged onto orders as it is.
+
+| Case | Count | Most likely reason |
+|---|---|---|
+| One order, several reviews | 547 orders (1,098 rows): 543 with 2 reviews, 4 with 3 | The customer answered the review survey more than once. Reviews are usually a few days apart (median 3, up to 106), and 202 of these orders have different scores |
+| One review, several orders | 789 reviews (1,603 rows) | One purchase split into several orders: in every case it is the same customer, and 95% of the orders were placed on the same day |
+
+In the main sample (93,598 orders), 622 orders (0.7%) have no review, and 508 have more than one. The dataset documentation does not explain either case; the reasons above are inferred from the data.
+
+**How we found it.** Count reviews per order and orders per review, then check whether the orders sharing a review belong to the same customer and were placed on the same day. This continues from the change 1 code (`orders` with parsed timestamps), with `reviews` loaded with `parse_dates=["review_creation_date", "review_answer_timestamp"]`.
+
+```python
+customers = pd.read_csv(f"{data_url}/olist_customers_dataset.csv")
+
+# One order, several reviews.
+reviews_per_order = reviews.groupby("order_id")["review_id"].size()
+multi_review_orders = reviews_per_order.index[reviews_per_order.gt(1)]
+multi_reviews = reviews.loc[reviews["order_id"].isin(multi_review_orders)].groupby("order_id")
+days_apart = (
+    multi_reviews["review_creation_date"].max() - multi_reviews["review_creation_date"].min()
+).dt.days
+print(f"Orders with more than one review: {len(multi_review_orders):,} "
+      f"({reviews['order_id'].isin(multi_review_orders).sum():,} rows)")
+print(f"  with different scores: {multi_reviews['review_score'].nunique().gt(1).sum()}")
+print(f"  days between first and last review: median {days_apart.median():.0f}, max {days_apart.max()}")
+
+# One review, several orders.
+orders_per_review = reviews.groupby("review_id")["order_id"].size()
+shared_ids = orders_per_review.index[orders_per_review.gt(1)]
+shared = (
+    reviews.loc[reviews["review_id"].isin(shared_ids), ["review_id", "order_id"]]
+    .merge(orders[["order_id", "customer_id", "order_purchase_timestamp"]], on="order_id")
+    .merge(customers[["customer_id", "customer_unique_id"]], on="customer_id")
+    .groupby("review_id")
+)
+same_day = (
+    shared["order_purchase_timestamp"].max().dt.normalize()
+    .eq(shared["order_purchase_timestamp"].min().dt.normalize())
+)
+print(f"Reviews attached to more than one order: {len(shared_ids):,} "
+      f"({reviews['review_id'].isin(shared_ids).sum():,} rows)")
+print(f"  same customer: {shared['customer_unique_id'].nunique().eq(1).mean():.0%}; "
+      f"orders placed on the same day: {same_day.mean():.0%}")
+```
+
+Expected output:
+- 547 orders with more than one review (1,098 rows); 202 with different scores; median 3 days and maximum 106 days between first and last review.
+- 789 reviews attached to more than one order (1,603 rows); 100% the same customer; 95% placed on the same day.
+
+**Decision.**
+- **Keep two ratings per order:** `review_score_first` (earliest review) and `review_score_last` (latest review), ordered by `review_creation_date` and then `review_answer_timestamp`. For orders with one review, both are the same.
+- **A review attached to several orders** gives its score to each of them.
+- **Orders without a review** keep missing ratings. Do not impute.
+- **The clustering team chooses** which rating to use and reports the other as a robustness check.
+
+**Why.**
+- **Neither review is clearly the right one.** The earliest is closest to the delivery experience; the latest is the customer's final view. Keeping both avoids making that choice in cleaning.
+- **The choice barely matters, and keeping both shows it.** Only 179 main-sample orders (0.2%) have different first and last scores. Average ratings are 4.21 for on-time and 3.55 for late orders under both.
+- **A shared review is a real answer for each order.** The customer rated the whole purchase, so each of its orders gets that score.
+- **No imputation,** for the same reason as changes 1 and 3: filling in a rating would invent a customer's opinion.
+
+**How to apply.** Applied in `01_cleaning.ipynb` (audit step "Orders with several reviews" and cleaning step "Attach review ratings").
+- Load `olist_order_reviews_dataset.csv` with the review dates parsed.
+- Sort reviews by `review_creation_date` and `review_answer_timestamp`; keep the first row per order as `review_score_first` and the last as `review_score_last`.
+- Left join both onto the main sample and group B, so no order is dropped.
+- Add to `orders_main.csv` and `orders_group_b.csv`: `review_score_first`, `review_score_last`.
+- Add to `seller_metrics.csv`: `reviewed_orders` (orders with a review), `avg_review_first`, `avg_review_last`, `low_review_share_first`, `low_review_share_last` (share of ratings of 2 stars or less). 3 sellers have no reviewed orders, so their review columns are missing.
+- The reconcile step checks that reviewed orders across sellers equal reviewed orders in `orders_main.csv` (92,976).
+
+Expected output: 622 main-sample orders without a review (0.7%); 179 whose first and last score differ (0.2%); 6 group B orders without a review. All earlier counts are unchanged (93,598 orders, 5,407 late, 2,917 sellers).
+
+**Report wording (Data section).**
+> Customer ratings come from the reviews table. 547 orders had more than one review, most likely because the customer answered the survey more than once, and 789 reviews applied to several orders bought together by the same customer. For each order we kept both the earliest and the latest review; they differ for only 179 orders (0.2%) and give the same results. Orders without a review (0.7%) were left without a rating.
+
+**Limitation to mention.** Ratings reflect the customer's whole experience, including carrier delivery and product quality, not only the seller's handover. Differences in ratings between seller groups are associations, not effects of late handover.
 
 ## Left to the clustering team
 
@@ -664,7 +743,7 @@ These are not cleaning decisions; the cleaning notebook passes them to the clust
 
 None. Every issue from the notebook review has been resolved (see **Resolved issues**).
 
-Expected result after changes 1–4: 93,598 orders in the main sample, January 2017 to August 2018 (the proposal's 93,859, minus 1 order in change 3 and 260 orders from 2016 in change 4), 1,156 orders in `Data/Clean/orders_group_b.csv`; together 94,754 orders for the `04_checks` check sample. With the date definition from change 6, the platform late rate in the main sample is 5.78%.
+Expected result after changes 1–4: 93,598 orders in the main sample, January 2017 to August 2018 (the proposal's 93,859, minus 1 order in change 3 and 260 orders from 2016 in change 4), 1,156 orders in `Data/Clean/orders_group_b.csv`; together 94,754 orders for the `04_checks` check sample. With the date definition from change 6, the platform late rate in the main sample is 5.78%. After change 8, 92,976 main-sample orders have a review rating.
 
 ## Documentation to update
 

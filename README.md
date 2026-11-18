@@ -75,9 +75,9 @@ Created by `notebooks/01_cleaning.ipynb`. The reasons for each cleaning step are
 
 | File | One row per | Contents | Used by |
 |------|-------------|----------|---------|
-| `seller_metrics.csv` | Seller (2,917) | `order_volume`, `late_orders`, `late_rate`, `benchmark_late_rate`, `late_rate_gap_pp`; no minimum-order threshold | Q1, Q2 clustering, figures |
+| `seller_metrics.csv` | Seller (2,917) | `order_volume`, `late_orders`, `late_rate`, `benchmark_late_rate`, `late_rate_gap_pp`; review summaries `reviewed_orders`, `avg_review_first`, `avg_review_last`, `low_review_share_first`, `low_review_share_last`; no minimum-order threshold | Q1, Q2 clustering, figures |
 | `monthly_benchmark.csv` | Month (20) | `orders`, `late_orders`, `late_rate` | Q1 same-month baseline, monthly trend figure, report |
-| `orders_main.csv` | Order (93,598) | Order IDs, seller, timestamps, deadline, `late_handover` | Rebuilding seller metrics under other settings, e.g. the 2017 → 2018 holdout |
+| `orders_main.csv` | Order (93,598) | Order IDs, seller, timestamps, deadline, `late_handover`, `review_score_first`, `review_score_last` | Rebuilding seller metrics under other settings, e.g. the 2017 → 2018 holdout |
 | `orders_group_b.csv` | Order (1,156) | Same columns; handed over after purchase but before payment approval | `04_checks` only |
 
 > **Which file to use.** All main analysis (Q1, Q2, figures, report and slide numbers) reads `Data/Clean/seller_metrics.csv` and `Data/Clean/monthly_benchmark.csv`. Use `Data/Clean/orders_main.csv` only when you need seller metrics under different settings, such as the 2017 → 2018 holdout. `Data/Clean/orders_group_b.csv` is only for the credibility check in `04_checks`, where it is combined with `orders_main.csv`. Do not add it to the main analysis.
