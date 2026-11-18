@@ -6,8 +6,9 @@
 | --- | --- | --- |
 | 1 | `notebooks/01_cleaning.ipynb` (data cleaning and merge) | ChatGPT, Claude |
 | 2 | `notebooks/02_descriptive_analysis.ipynb` (Q1 descriptive analysis) | Claude |
+| 3 | `read-me-first/pass-over-to-clustering.md` (review ratings for the Q2 clusters) | Claude |
 
-Contributor: [name]. The same text also appears at the end of each notebook; if you change one, change both.
+Contributor: [name]. The text for Parts 1 and 2 also appears at the end of each notebook; if you change one, change both. Part 3 appears only here.
 
 ## Part 1. Data cleaning and merge (`01_cleaning.ipynb`)
 
@@ -98,3 +99,9 @@ I used Claude (Anthropic) to plan and build this notebook.
   - Where two charts suited the same point, such as the Pareto chart, I decided to produce both and let the PPT role choose.
   - Claude first planned to save the tables behind the charts as separate CSV files. I asked instead for each table to be shown inside the notebook before its chart, so readers can see exactly which data each chart is drawn from.
 - **Build:** I used Claude to write this notebook based on `descriptive_analysis.markdown`, and to save the charts to the `figures/` directory.
+
+## Part 3. Review ratings for the clusters (Q2)
+
+- **Planning:** I wanted to add customer review ratings to our analysis, to see whether the clusters differ in customer satisfaction. I discussed this with Claude, and we compared our existing three clusters with review ratings. The high-late cluster had clearly lower ratings, and late orders scored lower than on-time orders in every cluster.
+- **Decision-making:** While preparing the ratings, Claude found that some orders have more than one review, so we discussed which rating to keep. Claude suggested keeping only the latest review. I asked Claude to rerun the analysis with the earliest review as well, and the results were practically the same. I then decided to keep two ratings, the earliest and the latest review, and to let the clustering team compare them and choose which one to use.
+- **Documentation:** I used Claude to write the "Review ratings" section of `read-me-first/pass-over-to-clustering.md`, including the code that builds both ratings and a summary of the findings so far.
