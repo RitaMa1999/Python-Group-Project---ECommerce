@@ -9,7 +9,7 @@ Seller late handover on the Olist Brazilian e-commerce marketplace. We study how
 | # | Question | Method |
 |---|----------|--------|
 | Q1 | How much do sellers differ in late handover? | Descriptive analysis: distributions of order volume, late orders and late rate, compared with the platform average and the same-month average |
-| Q2 | Which groups of sellers exist, and how should each be prioritized? | K-means clustering on late rate and log(order volume), standardized; k chosen with elbow / silhouette |
+| Q2 | Which groups of sellers exist, and how should each be prioritized? | K-means on late rate and log(1 + late orders), standardized, for sellers with ≥20 orders; k = 4 chosen with elbow / silhouette against a no-groups baseline; sellers in the focus tiers ranked by excess late handovers |
 
 **Late handover** = the order was handed to the carrier after `shipping_limit_date`.
 
@@ -30,28 +30,33 @@ Group 4 is our discussant and will ask questions about our analysis.
 
 ## Repository structure
 
-> **Read `read-me-first/` before starting your part.** The clustering team starts with `read-me-first/pass-over-to-clustering.md`, the PPT role with `read-me-first/pass-over-to-ppt.md`, and the report writer with `read-me-first/ai-use-appendix.md` for Appendix A.
+> **Read `read-me-first/` before starting your part.** The clustering team starts with `read-me-first/pass-over-to-clustering.md`, the PPT role with `read-me-first/pass-over-to-ppt.md`, and the report writer with `read-me-first/pass-over-to-report.md` (Q2 chapters) and `read-me-first/ai-use-appendix.md` (Appendix A).
 
 ```
 Data/
 ├── Raw/                      # Original Olist CSVs (do not edit)
-└── Clean/                    # Outputs of notebooks/01_cleaning.ipynb (do not edit by hand)
-    ├── orders_main.csv       # Main sample: 93,598 cleaned orders, Jan 2017 – Aug 2018
-    ├── orders_group_b.csv    # 1,156 orders handed over before payment approval; 04_checks only
-    ├── seller_metrics.csv    # One row per seller (2,917), built from orders_main.csv
-    └── monthly_benchmark.csv # Platform late rate by month (2017-01 to 2018-08)
+├── Clean/                    # Outputs of notebooks/01_cleaning.ipynb (do not edit by hand)
+│   ├── orders_main.csv       # Main sample: 93,598 cleaned orders, Jan 2017 – Aug 2018
+│   ├── orders_group_b.csv    # 1,156 orders handed over before payment approval; 04_checks only
+│   ├── seller_metrics.csv    # One row per seller (2,917), built from orders_main.csv
+│   └── monthly_benchmark.csv # Platform late rate by month (2017-01 to 2018-08)
+└── Results/                  # Outputs of notebooks/03_q2.ipynb (do not edit by hand)
+    ├── seller_tiers.csv      # 778 sellers with ≥20 orders: tier, excess late handovers, focus flag
+    └── focus_sellers_ranked.csv  # 159 focus-tier sellers ranked by excess late handovers
 notebooks/
 ├── 01_cleaning.ipynb         # Cleaning and merge; writes everything in Data/Clean/
 ├── change.markdown           # Cleaning decisions: problem, how we found it, decision, reasons
 ├── 02_descriptive_analysis.ipynb  # Q1 descriptive analysis; writes figures/q1_*.png
 ├── descriptive_analysis.markdown  # Q1 plan: each chart, why, and the decisions behind it
-├── 03_q2.ipynb
-├── 04_checks.ipynb
+├── q2_tiers.py               # Shared Q2 functions (features, K-means, tiers, profiles), used by 03 and 04
+├── 03_q2.ipynb               # Q2 tiers, profiles, ratings, focus tiers and seller ranking; writes Data/Results/ and figures/q2_*.png
+├── 04_checks.ipynb           # 10 credibility checks for Q2, with an English summary at the top
 └── 05_figures.ipynb
 figures/                      # All figures, named by notebook and item (e.g. q1_02a_pareto_curve.png)
 read-me-first/                # Read before starting your part
 ├── pass-over-to-clustering.md  # Handoff for Q2 and 04_checks: files, definitions, threshold, checks
-├── pass-over-to-ppt.md         # Handoff for the slides: figures, which to use, styling, key numbers
+├── pass-over-to-ppt.md         # Handoff for the slides: figures, which to use, styling, key numbers (Q1 and Q2)
+├── pass-over-to-report.md      # Handoff for the report's Q2 chapters: method, results, limitations, draft recommendations
 └── ai-use-appendix.md          # AI-use records from the notebooks, for the report's Appendix A
 ```
 
@@ -92,7 +97,7 @@ Created by `notebooks/01_cleaning.ipynb`. The reasons for each cleaning step are
 
 ## Decisions before cleaning
 
-- [ ] **Minimum orders per seller:** left to the clustering team; suggested 20 for the main analysis, with 10 and 30 as checks. See the handoff section of `notebooks/01_cleaning.ipynb`
+- [x] **Minimum orders per seller:** 20 for the main analysis (778 sellers, 87.5% of orders), with 10 and 30 as checks in `04_checks`
 - [x] **Drop 2016?** Yes. The study period is January 2017 to August 2018
 - [x] **How to measure lateness:** by date. The platform late rate is 5.78% by date and 9.10% by timestamp (tested in `04_checks`)
 

@@ -7,8 +7,9 @@
 | 1 | `notebooks/01_cleaning.ipynb` (data cleaning and merge) | ChatGPT, Claude |
 | 2 | `notebooks/02_descriptive_analysis.ipynb` (Q1 descriptive analysis) | Claude |
 | 3 | `read-me-first/pass-over-to-clustering.md` (review ratings for the Q2 clusters) | Claude |
+| 4 | `notebooks/03_q2.ipynb`, `notebooks/04_checks.ipynb`, `notebooks/q2_tiers.py` (Q2 seller tiers and credibility checks) | Claude |
 
-Contributor: [name]. The text for Parts 1 and 2 also appears at the end of each notebook; if you change one, change both. Part 3 appears only here.
+Contributor: [name]. The text for Parts 1 and 2 also appears at the end of each notebook; if you change one, change both. Parts 3 and 4 appear only here.
 
 ## Part 1. Data cleaning and merge (`01_cleaning.ipynb`)
 
@@ -105,3 +106,21 @@ I used Claude (Anthropic) to plan and build this notebook.
 - **Planning:** I wanted to add customer review ratings to our analysis, to see whether the clusters differ in customer satisfaction. I discussed this with Claude, and we compared our existing three clusters with review ratings. The high-late cluster had clearly lower ratings, and late orders scored lower than on-time orders in every cluster.
 - **Decision-making:** While preparing the ratings, Claude found that some orders have more than one review, so we discussed which rating to keep. Claude suggested keeping only the latest review. I asked Claude to rerun the analysis with the earliest review as well, and the results were practically the same. I then decided to keep two ratings, the earliest and the latest review, and to let the clustering team compare them and choose which one to use.
 - **Documentation:** I used Claude to write the "Review ratings" section of `read-me-first/pass-over-to-clustering.md`, including the code that builds both ratings and a summary of the findings so far.
+
+## Part 4. Q2 seller tiers and credibility checks (`03_q2.ipynb`, `04_checks.ipynb`, `q2_tiers.py`)
+
+Contributor: Rui. I used Claude (Anthropic) to plan, build and check the Q2 analysis, and to write the Q2 hand-over notes (`pass-over-to-ppt.md`, Q2 section; `pass-over-to-report.md`).
+
+- **Planning:** Claude first checked the cleaned data and the date-based definition of late handover against the raw data, then drafted a pipeline: put sellers into tiers with K-means, describe each tier with review ratings, choose the tiers managers should focus on, and rank the sellers inside them.
+- **Decision-making:** Claude offered options, but I made the final decisions:
+  - I kept K-means and used it to set the tier boundaries, rather than switching to a more complex method.
+  - After the pass-over suggested replacing log(order volume) with log(1 + late orders), I had Claude explain the change and rebuild the analysis with it, because Q2 asks about the scale of late handovers.
+  - I asked Claude to test product category and other features; none of them gave clearer groups, so the features stayed as they were.
+  - I asked for the tiers to be compared with review ratings, and decided to use ratings only to describe the tiers.
+  - I asked whether a seller's tier is fixed; Claude added the tier-movement table (check 6b), and we describe the tiers as a snapshot of one period.
+  - About 20 large Tier 3 sellers are not worse than the platform. I decided to keep them in the focus tiers with a note, because the ranking already puts them last.
+- **What the tool got wrong and how it was caught:**
+  - When I looked at the first scatter plot, I saw that K-means was cutting one continuous cloud of sellers into groups, although Claude had presented the groups as real. Claude then compared the silhouette score with a baseline that has no groups. The review below showed that its first baselines were not a fair comparison and made the groups look real; with a fair baseline, the real data scores no higher, so we describe the result as tiers on one lateness scale.
+  - I asked Claude to review the whole analysis from start to finish three times. This found further errors: the significance test did not allow for late handovers bunching in some months (allowing for it reduced the sellers worse than chance from 85 to 74); a correlation was reported as 0.90, which is the Spearman value (the Pearson value is 0.68); and the claim that higher tiers get lower ratings even on on-time orders holds only for Tier 4 once product category is held fixed.
+  - I asked Claude to apply five review points to the write-up: the Tier 3 name, the denominators of percentages, wording that implied cause, sellers with fewer than 20 orders, and the role of K-means.
+- **Build:** Claude wrote the notebooks, the shared functions in `q2_tiers.py`, the figures and the hand-over notes. I went through each part with Claude until I understood it, and checked the results before they were shared with the group.

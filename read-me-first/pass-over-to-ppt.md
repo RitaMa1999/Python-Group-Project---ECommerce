@@ -48,3 +48,70 @@ Either way, change only the appearance. Do not change the data, filters or the `
 **Correction.** The January 2017 platform late rate is **18.5%** (138 of 744 orders). An earlier draft said 18.6%; use 18.5%.
 
 **If the threshold changes.** These numbers use a 20-order threshold. If the clustering team chooses another threshold, the notebook is rerun and the numbers that depend on it (rows 4 and 5) change. Check the notebook output before finalising the slides.
+
+## Q2 and credibility-check slides (6–9)
+
+Q2 figures come from `notebooks/03_q2.ipynb`; check results come from `notebooks/04_checks.ipynb` (English summary at the top). The report uses the same wording and numbers (`read-me-first/pass-over-to-report.md`).
+
+### Wording
+
+| Item | Use | Avoid |
+| --- | --- | --- |
+| Groups | tier | cluster, "natural groups", "types of sellers" |
+| Tier names | Tier 1 Rarely late · Tier 2 Occasionally late · Tier 3 Slightly above platform, high volume · Tier 4 Severely late | "often late" for Tier 3 |
+| Ratings | "associated with" | "caused by", "leads to" |
+| Shares | Name the denominator: "of the 778 sellers with ≥20 orders" or "of all late handovers" | A bare "77%" |
+| Who to act on | The top 20 sellers | "All of Tier 3" |
+
+### Figures
+
+| Slide | File | Note to add on the slide |
+| --- | --- | --- |
+| 6 Q2 method | `q2_01_choose_k.png` (optional; text alone is fine if time is short) | "No k stands out, and the data scores no higher than data with no groups, so k = 4 is a judgement" |
+| 7 Q2 findings | `q2_02_tiers.png` | "The tiers lie along one lateness scale" |
+| 7 Q2 findings | `q2_03_tier_ratings.png` | "After adjusting for product category, only Tier 4 is still rated lower" |
+| 8 Q2 recommendations | No chart: the top 5 sellers (below) and the action for each tier (agreed on Friday, see `pass-over-to-report.md`) | Use the first 6 characters of each seller ID |
+| 9 Credibility checks | No chart: the check table below | — |
+
+### Numbers for the Q2 slides
+
+| Number | Value |
+| --- | --- |
+| Sellers in the tiers | 778 with ≥20 orders (87.5% of orders) |
+| Tiers (sellers, late rate) | Tier 1: 383, 0.6% · Tier 2: 236, 3.2% · Tier 3: 132, 8.6% · Tier 4: 27, 36.1% |
+| Focus tiers (4 and 3) | 159 sellers (20% of the 778) with 77% of these sellers' late handovers (64% of all late handovers) |
+| Top 20 sellers | 46% of excess late handovers; all 20 are worse than the platform beyond chance |
+| Low ratings (≤2 stars) | Tier 4: 26.0% · Tier 1: 9.6% |
+| Effect on customers | Only about 20% of late deliveries followed a late handover |
+
+Top 5 sellers by excess late handovers (late handovers above what the same-month platform rate predicts):
+
+| Rank | Seller | Tier | Orders | Late handovers | Late rate | Excess late handovers |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 7c67e1 | 3 | 963 | 189 | 19.6% | 134 |
+| 2 | 88460e | 4 | 224 | 107 | 47.8% | 94 |
+| 3 | 06a2c3 | 4 | 369 | 102 | 27.6% | 84 |
+| 4 | 1025f0 | 3 | 869 | 115 | 13.2% | 69 |
+| 5 | 816025 | 3 | 352 | 80 | 22.7% | 58 |
+
+### Slide 9: credibility checks
+
+| Check | Result |
+| --- | --- |
+| Minimum orders 10 or 30 instead of 20 | At least 99% of focus sellers stay in focus; all top 20 stay |
+| Late by timestamp instead of by date | 99% stay; all top 20 stay |
+| Orders handed over before payment approval added | 100% stay |
+| k = 3 or 5 instead of 4 | k = 5: 97% stay. k = 3: only the 58 most severe sellers are in focus, but 18 of the top 20 stay |
+| Tiers built on 2017, checked in 2018 | 2017 focus sellers are still worse in 2018 (7.3% vs 2.6% late). Individual sellers move between tiers, so tiers are a snapshot |
+| Chance | Allowing for late handovers that bunch in some months, all top 20 sellers are worse than the platform |
+
+One sentence for the slide: "The top 20 sellers stay the same under every check; where the edge of the focus group falls depends on k."
+
+### Questions to prepare for
+
+1. **Why use K-means if the ranking already finds the top 20?** The ranking says whom to act on first; the tiers say which kind of action fits each group.
+2. **What about sellers with fewer than 20 orders?** They are outside the tiers; use a simple rule, such as a reminder after a set number of late handovers.
+3. **Do late handovers cause low ratings?** They are associated with lower ratings. After adjusting for product category, only Tier 4 is rated lower on orders that were on time.
+4. **Is a seller's tier fixed?** No. The tiers describe one period, so sellers are re-scored each period with the same boundaries.
+5. **Q1 says 237 sellers are above the platform rate; why does Q2 focus on 159?** Q1 counts every seller whose own late rate is above the platform. Q2 groups sellers by both late rate and number of late handovers: 97 of the 237 are in Tier 2 with only a few late handovers, and Tier 3 also includes about 20 large sellers whose late rate is at or below the platform.
+

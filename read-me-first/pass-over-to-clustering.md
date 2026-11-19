@@ -84,9 +84,9 @@ From the Q2 tier analysis (Rui, 18 November 2026: K-means on late rate and log(1
 
 | Tier | Sellers | Late rate | Share of late orders of sellers with ≥20 orders | Avg. rating | Share of reviews ≤ 2 stars |
 | --- | --- | --- | --- | --- | --- |
-| 1: almost never late | 383 | 0.6% | 3% | 4.30 | 9.6% |
+| 1: rarely late | 383 | 0.6% | 3% | 4.30 | 9.6% |
 | 2: occasionally late | 236 | 3.2% | 20% | 4.19 | 11.8% |
-| 3: often late, large volume | 132 | 8.6% | 58% | 4.09 | 14.1% |
+| 3: slightly above platform, high volume | 132 | 8.6% | 58% | 4.09 | 14.1% |
 | 4: severely late | 27 | 36.1% | 18% | 3.63 | 26.0% |
 
 - **Denominator:** the late-order shares are of the 4,493 late orders of sellers with ≥20 orders. Of all 5,407 late orders, the focus tiers (3 and 4) account for about 64%, not 77%.
