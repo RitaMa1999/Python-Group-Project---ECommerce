@@ -19,7 +19,7 @@ Write it in the order method → results → what it means.
 
 - Only sellers with at least 20 orders are placed in tiers (778 sellers, 87.5% of orders). The threshold applies to the tiers only; the platform late rate uses all 93,598 orders.
 - Two features, both standardized: **late rate** (severity) and **log(1 + late orders)** (scale of late handovers). Q2 asks about the scale of late handovers, not the size of the seller, so late orders replace order volume. With order volume, the seller with the most late handovers was grouped with large, mostly punctual sellers.
-- K-means was run for k = 2 to 8. The silhouette score of the real data is no higher than for data built to have no groups, and the elbow has no sharp bend. The two features are linked (late orders = late rate × order volume), so K-means cuts sellers into ordered tiers along one lateness scale. k = 4 is a judgement: four tiers can each be given a management action. The tiers are the same across 10 random seeds (adjusted Rand index at least 0.98).
+- K-means was run for k = 2 to 8. The silhouette score of the real data is no higher than for data built to have no groups, and the elbow has no sharp bend. The two features are linked (late orders = late rate × order volume), so K-means cuts sellers into ordered tiers along one lateness scale. k = 4 is a judgement: four tiers can each be given a management action. The tier assignments were very similar across 10 random seeds (minimum adjusted Rand index 0.980).
 - **Focus tiers** are the tiers whose late rate is above the same-month platform rate (Tiers 4 and 3). Inside them, sellers are ranked by **excess late handovers**: actual late handovers minus the number the same-month platform rate predicts.
 - The ranking answers "whom to act on first"; the tiers answer "which kind of action fits each group".
 
@@ -36,7 +36,7 @@ Write it in the order method → results → what it means.
 
 - "We use K-means to cut sellers into four tiers along a single lateness scale. The tiers are not natural groups: the silhouette score is no higher than for data with no groups, partly because late orders equal late rate times order volume."
 - "The 159 sellers in the two focus tiers account for 77% of late handovers among the 778 sellers with at least 20 orders (64% of all late handovers in the main sample)."
-- "The top 20 sellers account for 46% of the excess late handovers."
+- "The top 20 sellers account for 46% of the total positive excess late handovers across all 778 tiered sellers."
 - "The ranking by excess late handovers tells managers whom to act on first; the tiers tell them which kind of action fits each group of sellers."
 - "Late handovers are associated with lower ratings. After adjusting for product category, only Tier 4 is rated lower on orders that were on time."
 
@@ -51,7 +51,7 @@ Write it in the order method → results → what it means.
 **Limitations.** State at least 1–6.
 
 1. **The tiers are not natural groups.** They are cut from one lateness scale, partly because the two features are linked. One side effect: about 20 large sellers in Tier 3 have a late rate at or below the platform and are there only because of their number of late handovers. Their excess late handovers are zero or negative, so they come last in the ranking.
-2. **k = 4 is a judgement.** The edge of the focus group depends on k: with k = 3 only the 58 most severe sellers are in focus. The top 20 sellers do not depend on it (18 of 20 stay with k = 3).
+2. **k = 4 is a judgement.** The edge of the focus group depends on k: with k = 3 only the 58 most severe sellers are in focus. With three tiers, 18 of the original top 20 sellers stayed in focus.
 3. **Some choices were made after seeing results.** The second feature (late orders instead of order volume) and the focus-tier rule were set after looking at the results. The reason is the wording of Q2, and the earlier version is shown in `04_checks` (check 5).
 4. **The effect on customers is small.** Only about 20% of late deliveries followed a late handover. Fixing the top 20 sellers' excess late handovers might avoid about 3% of late deliveries and about 1% of low ratings (an association-based estimate, not causal).
 5. **Ratings show association, not cause.** Ratings also depend on carrier delivery and product quality. After adjusting for product category, only Tier 4 is rated lower, and Tier 4 has only 27 sellers.

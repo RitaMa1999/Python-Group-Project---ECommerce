@@ -1,0 +1,23 @@
+# Theme for the prototype (prototype/app.py): the presentation's style, with a cream background,
+# plum text, a purple scale for the tiers and pastel accents. Calibri where installed, else a close match.
+[theme]
+base = "light"
+primaryColor = "#76549d"
+backgroundColor = "#fffcfa"
+secondaryBackgroundColor = "#f4ebfb"
+textColor = "#34253f"
+font = "Calibri, Carlito, Lato, Arial, sans-serif"
+headingFont = "Calibri, Carlito, Lato, Arial, sans-serif"
+headingFontWeights = 700
+linkColor = "#76549d"
+blueColor = "#76549d"
+blueBackgroundColor = "#f2e8f9"
+blueTextColor = "#573766"
+borderColor = "#dad0e0"
+dataframeBorderColor = "#dad0e0"
+dataframeHeaderBackgroundColor = "#f0e3f5"
+chartCategoricalColors = ["#c6a6e8", "#9a78c8", "#6c4b94", "#34253f"]
+
+[client]
+# Hide the developer menu, so the screen recording shows only the app
+toolbarMode = "minimal"

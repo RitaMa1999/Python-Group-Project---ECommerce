@@ -80,7 +80,7 @@ Q2 figures come from `notebooks/03_q2.ipynb`; check results come from `notebooks
 | Sellers in the tiers | 778 with ≥20 orders (87.5% of orders) |
 | Tiers (sellers, late rate) | Tier 1: 383, 0.6% · Tier 2: 236, 3.2% · Tier 3: 132, 8.6% · Tier 4: 27, 36.1% |
 | Focus tiers (4 and 3) | 159 sellers (20% of the 778) with 77% of these sellers' late handovers (64% of all late handovers) |
-| Top 20 sellers | 46% of excess late handovers; all 20 are worse than the platform beyond chance |
+| Top 20 sellers | 46% of the positive excess late handovers across all 778 tiered sellers. All 20 had significantly more late handovers than expected under the main test. |
 | Low ratings (≤2 stars) | Tier 4: 26.0% · Tier 1: 9.6% |
 | Effect on customers | Only about 20% of late deliveries followed a late handover |
 
@@ -98,14 +98,15 @@ Top 5 sellers by excess late handovers (late handovers above what the same-month
 
 | Check | Result |
 | --- | --- |
-| Minimum orders 10 or 30 instead of 20 | At least 99% of focus sellers stay in focus; all top 20 stay |
-| Late by timestamp instead of by date | 99% stay; all top 20 stay |
-| Orders handed over before payment approval added | 100% stay |
-| k = 3 or 5 instead of 4 | k = 5: 97% stay. k = 3: only the 58 most severe sellers are in focus, but 18 of the top 20 stay |
+| Minimum orders 10 or 30 instead of 20 | At least 99% of eligible original focus sellers and all of the original top 20 stay in focus. |
+| Late by timestamp instead of by date | 99% of the original focus sellers and all of the original top 20 stay in focus. |
+| Orders handed over before payment approval added | All original focus sellers stay in focus, including the top 20. |
+| Three or five tiers instead of four | With five tiers, 97% of the original focus sellers stay in focus. With three tiers, 58 sellers are in focus, including 18 of the original top 20. |
+| Earlier feature set using order volume | 14 of the original top 20 stay in focus. |
 | Tiers built on 2017, checked in 2018 | 2017 focus sellers are still worse in 2018 (7.3% vs 2.6% late). Individual sellers move between tiers, so tiers are a snapshot |
 | Chance | Allowing for late handovers that bunch in some months, all top 20 sellers are worse than the platform |
 
-One sentence for the slide: "The top 20 sellers stay the same under every check; where the edge of the focus group falls depends on k."
+One sentence for the slide: "Most of our top 20 sellers stayed in the focus group across the checks. With three tiers, 18 stayed in focus. With the earlier feature set, 14 did."
 
 ### Questions to prepare for
 

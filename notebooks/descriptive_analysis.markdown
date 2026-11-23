@@ -94,12 +94,12 @@ A Pareto chart shows whether a problem is concentrated in a few items, the "80/2
 
 #### 2B. Top 20 sellers by late orders (horizontal bars)
 
-**What.** One bar per seller for the 20 sellers with the most late orders, labelled with the seller's order volume and late rate. Seller IDs are shown as ranks (Seller 1, 2, …) because the 32-character IDs are unreadable on a slide; the full IDs are in the backup table.
+**What.** One bar per seller for the 20 sellers with the most late orders, labelled with the seller's order volume and late rate. Seller IDs are shown as ranks (Seller 1, 2, …) because the 32-character IDs are unreadable on a slide; see notebook 02 for full seller IDs.
 
 **Explanation.**
 - *How to read it:* bar length is the number of late orders; the label shows whether the seller is large, slow, or both.
 - *Key finding:* the top 20 sellers account for 24.5% of late orders, but they are two different kinds of seller. Some are large and close to the platform rate (for example 1,658 orders at 4% late; 3 of the 20 are below the platform rate of 5.78%). Others are mid-sized and very late (for example 224 orders at 48% late; 12 of the 20 are more than 5 pp above their same-month benchmark).
-- *For managers:* the number of late orders alone mixes "large but punctual" sellers with "genuinely slow" ones, which need different actions. This is why Q2 clusters on both order volume and late rate.
+- *For managers:* the number of late orders alone mixes "large but punctual" sellers with "genuinely slow" ones, which need different actions. Q2 groups sellers using their late handover rate and the log-transformed number of late handovers.
 
 **Slide.** 4 or 5 (option), or backup; can also serve as the transition to Q2.
 
@@ -125,7 +125,7 @@ Shown in `02_descriptive_analysis.ipynb` before charts 3A and 3B: late-rate band
 | Above 0%, at or below platform (5.78%) | 290 | 1,198 | 22.2% |
 | 5.78–10% | 96 | 750 | 13.9% |
 | 10–20% | 88 | 1,282 | 23.7% |
-| 20% and above | 53 | 1,263 | 23.4% |
+| >20% | 53 | 1,263 | 23.4% |
 | Sellers with <20 orders (not shown in the charts) | 2,139 | 914 | 16.9% |
 
 The table also shows percentiles for sellers with ≥20 orders: 10th 0.0%, 25th 0.0%, median 2.7%, 75th 7.7%, 90th 16.2%.
@@ -143,11 +143,11 @@ The table also shows percentiles for sellers with ≥20 orders: 10th 0.0%, 25th 
 
 #### 3B. Late-rate bands (bar chart)
 
-**What.** Five bars: 0%, above 0% up to the platform rate, 5.78–10%, 10–20% and 20%+. Each bar is labelled with the number of sellers and their share of all late orders. Bars at or below the platform rate are light; bars above it are dark. A note under the chart says the shares add up to 83% because sellers with fewer than 20 orders (17% of late orders) are not shown.
+**What.** Five bars: 0%, above 0% up to the platform rate, 5.78–10%, 10–20% and >20%. Each bar is labelled with the number of sellers and their share of all late orders. Bars at or below the platform rate are light; bars above it are dark. A note under the chart says the shares add up to 83% because sellers with fewer than 20 orders (17% of late orders) are not shown.
 
 **Explanation.**
 - *How to read it:* bar height is the number of sellers in the band; the label shows how much of the late-handover problem that band causes.
-- *Key finding:* 541 sellers (70%) are at or below the platform rate and cause 22% of late orders. The 237 sellers above it (30%) cause 61%. Only 53 sellers are late on 20% or more of their orders, yet they cause 23% of late orders.
+- *Key finding:* 541 sellers (70%) are at or below the platform rate and cause 22% of late orders. The 237 sellers above it (30%) cause 61%. Only 53 sellers are late on more than 20% of their orders, yet they cause 23% of late orders.
 - *For managers:* the problem sits with a minority of sellers; this supports the Pareto finding from a rate perspective.
 
 **Slide.** 4 (recommended).
@@ -160,11 +160,11 @@ The table also shows percentiles for sellers with ≥20 orders: 10th 0.0%, 25th 
 - The points form a funnel: on the left, small sellers sit at 0% or 100%; to the right, rates narrow as volume grows (see the table in **Which charts use a minimum-order threshold**).
 - There is no clear relationship between size and lateness: for sellers with ≥20 orders the correlation between log order volume and late rate is about 0 (0.003).
 
-**Why.** Explains in one chart why rate-based charts and the clustering use a threshold, and shows that scale and severity are independent, which motivates using both in the Q2 clustering.
+**Why.** The spread in observed rates at low order volumes explains the 20-order minimum for rate comparisons and clustering.
 
 **Explanation.**
 - *How to read it:* each point is a seller; further right means more orders, higher means a higher late rate, larger points have more late orders. The dashed line marks 20 orders.
-- *Key finding:* sellers with 1 order can only be at 0% or 100%; the spread of late rates falls from a standard deviation of 0.35 (1 order) to 0.08 (50+ orders). Sellers under 20 orders are 73% of sellers but 12% of orders. Size and lateness are unrelated (correlation about 0).
+- *Key finding:* sellers with 1 order can only be at 0% or 100%; the spread of late rates falls from a standard deviation of 0.35 (1 order) to 0.08 (50+ orders). Sellers under 20 orders are 73% of sellers but 12% of orders. Among eligible sellers, log order volume and late rate have almost no linear relationship (r = 0.003).
 - *For managers:* late rates of very small sellers should not be used to rank them; and large sellers are not automatically more punctual, so both size and lateness matter.
 
 **Table behind the chart.** Shown in `02_descriptive_analysis.ipynb` before the chart: the order-volume groups table in **Which charts use a minimum-order threshold**.
@@ -190,8 +190,8 @@ Also shown: the distribution of `late_rate_gap_pp` (10th percentile −6.0 pp, m
 
 **Explanation.**
 - *How to read it:* the diagonal cells are sellers classified the same way by both comparisons; the off-diagonal cells change sides once months are taken into account.
-- *Key finding:* only 18 of 778 sellers (2.3%) change classification. Adjusting for months with higher platform-wide late rates does not change which sellers are worse than the platform.
-- *For managers and Q&A:* answers "was the whole platform simply slow in the months this seller was active?" No: sellers above the platform rate are also above it in their own months.
+- *Key finding:* 760 of 778 sellers stayed in the same category. The other 18 (2.3%) changed category when we used the same-month benchmark.
+- *For managers and Q&A:* Of the 237 sellers above the overall platform rate, 229 were also above their same-month benchmark.
 
 **Why no chart.** A chart of the gap would show almost the same picture as item 3B. Its value is as a credibility check, so a table and one sentence are enough.
 

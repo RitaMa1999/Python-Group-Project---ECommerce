@@ -51,13 +51,17 @@ notebooks/
 ├── q2_tiers.py               # Shared Q2 functions (features, K-means, tiers, profiles), used by 03 and 04
 ├── 03_q2.ipynb               # Q2 tiers, profiles, ratings, focus tiers and seller ranking; writes Data/Results/ and figures/q2_*.png
 ├── 04_checks.ipynb           # 10 credibility checks for Q2, with an English summary at the top
-└── 05_figures.ipynb
-figures/                      # All figures, named by notebook and item (e.g. q1_02a_pareto_curve.png)
+└── 05_figures.ipynb          # Slide versions of the figures in the presentation's style (same data); writes figures/slide*.png
+figures/                      # All figures, named by notebook and item (e.g. q1_02a_pareto_curve.png); slide versions start with slideNN_
+prototype/
+└── app.py                    # Streamlit prototype for managers: a read-only view of Data/Results/ (see How to run)
+.streamlit/config.toml        # Prototype theme: the presentation's colours and font
 read-me-first/                # Read before starting your part
 ├── pass-over-to-clustering.md  # Handoff for Q2 and 04_checks: files, definitions, threshold, checks
 ├── pass-over-to-ppt.md         # Handoff for the slides: figures, which to use, styling, key numbers (Q1 and Q2)
-├── pass-over-to-report.md      # Handoff for the report's Q2 chapters: method, results, limitations, draft recommendations
+├── pass-over-to-report.md      # Handoff for the report's Q2 chapters: method, results, limitations, recommendations
 └── ai-use-appendix.md          # AI-use records from the notebooks, for the report's Appendix A
+pyproject.toml, uv.lock       # Python version and packages for uv (see How to run)
 ```
 
 ### Raw data (`Data/Raw/`)
@@ -89,11 +93,39 @@ Created by `notebooks/01_cleaning.ipynb`. The reasons for each cleaning step are
 
 **Key definitions.** The main sample is delivered, single-seller orders with complete, correctly ordered timestamps, placed from January 2017 to August 2018. An order is a late handover when it is handed to the carrier on a calendar day after its `shipping_limit_date` day. The platform late rate is 5.78%.
 
+## How to run
+
+The project uses [uv](https://docs.astral.sh/uv/). `pyproject.toml` lists the Python version and packages, and `uv.lock` fixes their exact versions, so everyone gets the same results.
+
+1. Install the environment once, from the repository folder:
+
+   ```
+   uv sync
+   ```
+
+2. Run the notebooks in order, 01 → 05. Each one reads the outputs of the notebooks before it, so together they rebuild `Data/Clean/`, `Data/Results/` and `figures/` from the raw data. Either open them with `uv run jupyter lab` and run all cells, or run them from the terminal:
+
+   ```
+   uv run jupyter nbconvert --to notebook --execute --inplace notebooks/01_cleaning.ipynb
+   uv run jupyter nbconvert --to notebook --execute --inplace notebooks/02_descriptive_analysis.ipynb
+   uv run jupyter nbconvert --to notebook --execute --inplace notebooks/03_q2.ipynb
+   uv run jupyter nbconvert --to notebook --execute --inplace notebooks/04_checks.ipynb
+   uv run jupyter nbconvert --to notebook --execute --inplace notebooks/05_figures.ipynb
+   ```
+
+   `01_cleaning` reads the raw CSVs from this repository on GitHub, so it needs an internet connection.
+
+3. Start the prototype (it reads `Data/Results/`, so run `03_q2` first):
+
+   ```
+   uv run streamlit run prototype/app.py
+   ```
+
 ## Shared conventions
 
 - Every notebook reads from the same `Data/Clean/seller_metrics.csv`. Don't re-clean the data in your own notebook, so the numbers in the report, slides and code stay consistent.
 - Write code comments and variable names in English, and remove unused code.
-- Name figures in `figures/` by notebook and item number (for example `q1_02a_pareto_curve.png`), because slide numbers are not final. The PPT role can save slide-numbered copies once the slides are fixed.
+- Name figures in `figures/` by notebook and item number (for example `q1_02a_pareto_curve.png`), because slide numbers are not final. Slide versions are drawn in `05_figures.ipynb` and named by slide (for example `slide07_tiers.png`); they change only the appearance, not the data.
 
 ## Decisions before cleaning
 
@@ -105,12 +137,10 @@ Created by `notebooks/01_cleaning.ipynb`. The reasons for each cleaning step are
 
 | Role | Responsible for | Presents | Owner |
 |------|-----------------|----------|-------|
-| Data | Cleaning, seller-level table, credibility checks, final end-to-end run; discussant on the day | Data and credibility checks (~2:00) | TBD |
-| Analysis | Q1 descriptive analysis, Q2 K-means, cluster profiles and priorities | Q2 method, findings and recommendations (~3:00) | TBD |
-| Report | Writing and editing the full report, AI-use appendix, contribution statement | Problem, research questions, conclusion (~2:30) | TBD |
-| PPT | Full slide deck, plotting code, timed rehearsal | Q1 method and findings (~2:30) | TBD |
-
-Daisy presented the data at the proposal stage, so she could keep the Data role. The other three roles go to whoever is strongest at each.
+| Data | Cleaning, seller-level and monthly tables, Q1 descriptive analysis, final end-to-end run; discussant on the day | Data and Q1 (~2:45) | Yanxin (Rita) Ma |
+| Analysis | Q2 K-means tiers and seller ranking, credibility checks (`04_checks`), tier recommendations | Q2 method, findings and credibility checks (~3:05) | Rui Chen |
+| Report | Writing and editing the full report, AI-use appendix, contribution statement | Problem, research questions, recommendations (~2:20) | Lingli (Helen) Li |
+| PPT & prototype | Slide deck, slide figures (`05_figures`), prototype (`prototype/app.py`) and its demo video, timed rehearsal | Prototype video, conclusion (~1:35) | Jingshu (Daisy) Fu |
 
 ## Tasks by role
 
@@ -139,33 +169,37 @@ The critical step is **`seller_metrics.csv` on Tuesday evening**. All later anal
 - [ ] Sat (Nov 21): Recommendations, Conclusion, Limitations; edit down to 12 pages
 - [ ] Sun (Nov 22): collect everyone's AI-use notes for the appendix; prepare the contribution statement
 
-### PPT
+### PPT & prototype
 - [ ] Mon (Nov 16): set up a 10-slide skeleton from the proposal template and share it with the group
 - [ ] Tue–Thu (Nov 17–19): problem, research question and data slides; Q1 plotting code from `seller_metrics.csv`
 - [ ] Fri (Nov 20): Q2 and credibility-check figures; fill every slide
 - [ ] Sat (Nov 21): finalize the slides; remind everyone to write their script
+- [ ] Sun (Nov 22): `05_figures`, slide versions of the figures in the presentation's style (`figures/slide*.png`)
+- [ ] Sun (Nov 22): prototype (`prototype/app.py`), a read-only view of `Data/Results/` for managers; record the demo video for slide 10
 - [ ] Sun (Nov 22): run a timed rehearsal; send the slides to the instructor
 
 ### Everyone
 - [ ] Keep notes on what you used AI for and what you checked (needed for the AI-use appendix)
 - [ ] Read the full report before Sunday. The instructor may ask anyone about any part
 
-## Presentation plan (10 slides, 10 minutes)
+## Presentation plan (12 slides, 10 minutes)
 
 | # | Content | Speaker | Time |
 |---|---------|---------|------|
-| 1 | Title + problem: why seller late handover is worth managing | Report | 0:45 |
-| 2 | Audience and the two research questions | Report | 0:45 |
+| 1 | Title page | Report | 0:10 |
+| 2 | Problem, audience and the two research questions | Report | 1:20 |
 | 3 | Data and the definition of late handover (one slide, no cleaning details) | Data | 0:45 |
-| 4 | Q1 method + main finding: how much sellers differ | PPT | 1:15 |
-| 5 | What the Q1 findings mean for managers | PPT | 1:15 |
-| 6 | Q2 method: features used and how k was chosen | Analysis | 1:00 |
-| 7 | Q2 findings: seller cluster profiles | Analysis | 1:15 |
-| 8 | Q2 recommendations: priority and management action for each cluster | Analysis | 0:45 |
-| 9 | Credibility checks: thresholds, definitions, 2017 → 2018 | Data | 1:15 |
-| 10 | Conclusion, limitations, challenges | Report | 1:00 |
+| 4 | Q1: late handovers are concentrated in a few sellers | Data | 1:00 |
+| 5 | Q1 for managers: judge rates only with enough orders, then focus | Data | 1:00 |
+| 6 | Q2 method: features, choice of k, focus tiers and ranking | Analysis | 0:55 |
+| 7 | Q2 findings: four tiers along one lateness scale | Analysis | 1:10 |
+| 8 | Credibility checks: why the results hold | Analysis | 1:00 |
+| 9 | Q2 recommendations: whom to contact first, and how | Report | 0:50 |
+| 10 | Prototype video (recorded voice-over) | PPT & prototype | 0:40 |
+| 11 | Conclusion, limitations and challenges | PPT & prototype | 0:55 |
+| 12 | Thank you; questions | PPT & prototype | — |
 
-Totals: Report 2:30, Data 2:00, PPT 2:30, Analysis 3:00. Slides 4–9 cover the analysis and findings (6 slides, in line with the instructor's suggested 6–7). PPT presents Q1, so they should go through the results with Analysis on Thursday. In Q&A, each person answers first for the part they presented.
+Totals: Report 2:20, Data 2:45, Analysis 3:05, PPT & prototype 1:35 (0:40 of it the recorded video); 9:45 in all. Slides 4–9 cover the analysis and findings (6 slides, in line with the instructor's suggested 6–7). The order follows the report: findings, then the credibility checks, then recommendations. Each person presents the part they built, and in Q&A answers first for those slides.
 
 ## Report plan (about 11 pages, 1 page spare)
 

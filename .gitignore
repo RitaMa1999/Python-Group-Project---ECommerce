@@ -1,0 +1,7 @@
+# Local Python environment created by `uv sync`
+.venv/
+__pycache__/
+
+# Jupyter and macOS files
+.ipynb_checkpoints/
+.DS_Store
